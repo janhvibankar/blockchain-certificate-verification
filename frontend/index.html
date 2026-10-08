@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO Meta Tags -->
+  <title>Blockchain Certificate Verification System</title>
+  <meta name="description" content="Decentralized application for issuing and verifying academic certificates on Ethereum blockchain. Secure, transparent, and tamper-resistant." />
+  <meta name="keywords" content="blockchain, certificate verification, ethereum, smart contract, DApp, academic credentials" />
+  <meta name="author" content="Blockchain Certificate Project" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔗</text></svg>" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===================================================== -->
+  <!-- NETWORK ALERT (shown when wrong network) -->
+  <!-- ===================================================== -->
+  <div id="networkAlert" class="network-alert">
+    ⚠️ Wrong network detected. Please switch MetaMask to <strong>Hardhat Local Network (Chain ID: 31337)</strong>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- NAVIGATION BAR -->
+  <!-- ===================================================== -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-brand">
+      <div class="brand-icon">🔗</div>
+      <span>BlockCert Verify</span>
+    </div>
+
+    <ul class="nav-links" id="navLinks" role="menubar">
+      <li><a href="#" role="menuitem" data-section="home"   class="active" id="navHome">Home</a></li>
+      <li><a href="#" role="menuitem" data-section="issue"  id="navIssue">Issue Certificate</a></li>
+      <li><a href="#" role="menuitem" data-section="verify" id="navVerify">Verify Certificate</a></li>
+      <li><a href="#" role="menuitem" data-section="admin"  id="navAdmin">Admin Dashboard</a></li>
+      <li><a href="#" role="menuitem" data-section="about"  id="navAbout">About</a></li>
+    </ul>
+
+    <div class="nav-wallet">
+      <div class="wallet-status" id="walletStatus" aria-live="polite">
+        <div class="wallet-dot" id="walletDot"></div>
+        <span id="walletAddress">Not Connected</span>
+      </div>
+      <button class="btn-connect-nav" id="btnConnectWallet" aria-label="Connect MetaMask wallet">
+        🦊 Connect Wallet
+      </button>
+    </div>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">☰</button>
+  </nav>
+
+  <!-- ===================================================== -->
+  <!-- PAGE: HOME                                            -->
+  <!-- ===================================================== -->
+  <section id="sectionHome" class="page-section active" aria-label="Home">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-badge">⛓️ Ethereum Blockchain Powered</div>
+      <h1>Verify Academic Certificates<br/>with Blockchain</h1>
+      <p class="hero-subtitle">
+        Secure, transparent, and tamper-resistant certificate verification
+        powered by Ethereum smart contracts. No central authority required.
+      </p>
+      <div class="hero-buttons">
+        <button class="btn btn-primary btn-lg" id="heroIssueBtn" onclick="showSection('issue')">
+          🎓 Issue Certificate
+        </button>
+        <button class="btn btn-secondary btn-lg" id="heroVerifyBtn" onclick="showSection('verify')">
+          🔍 Verify Certificate
+        </button>
+        <button class="btn btn-ghost btn-lg" id="heroConnectBtn" onclick="connectWallet()">
+          🦊 Connect Wallet
+        </button>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid" role="list" aria-label="Project features">
+        <div class="stat-card" role="listitem">
+          <span class="stat-icon">⛓️</span>
+          <div class="stat-title">Blockchain Secured</div>
+          <div class="stat-desc">Data stored permanently on Ethereum blockchain</div>
+        </div>
+        <div class="stat-card" role="listitem">
+          <span class="stat-icon">🛡️</span>
+          <div class="stat-title">Tamper Resistant</div>
+          <div class="stat-desc">SHA-256 hash comparison detects any modification</div>
+        </div>
+        <div class="stat-card" role="listitem">
+          <span class="stat-icon">⚡</span>
+          <div class="stat-title">Instant Verification</div>
+          <div class="stat-desc">Verify any certificate in seconds from anywhere</div>
+        </div>
+        <div class="stat-card" role="listitem">
+          <span class="stat-icon">🌐</span>
+          <div class="stat-title">No Central Database</div>
+          <div class="stat-desc">Decentralized — no single point of failure</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="section-container">
+      <div class="section-header">
+        <h2>How It Works</h2>
+        <p>Simple 3-step process to issue and verify certificates</p>
+      </div>
+      <div class="card">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-content">
+            <h4>Institute Issues Certificate</h4>
+            <p>Admin connects MetaMask, fills certificate details, uploads certificate file (SHA-256 hash is generated automatically), and submits to blockchain.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-content">
+            <h4>Data Stored on Blockchain</h4>
+            <p>The smart contract stores certificate data permanently on the blockchain. The transaction is immutable and verifiable by anyone.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-content">
+            <h4>Anyone Can Verify</h4>
+            <p>Students, employers, or anyone can enter a Certificate ID to instantly retrieve and verify its authenticity directly from the blockchain.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PAGE: ISSUE CERTIFICATE                               -->
+  <!-- ===================================================== -->
+  <section id="sectionIssue" class="page-section" aria-label="Issue Certificate">
+    <div class="section-container">
+
+      <div class="section-header">
+        <h2>Issue Certificate</h2>
+        <p>Issue a new academic certificate on the blockchain</p>
+      </div>
+
+      <!-- MetaMask Warning -->
+      <div class="metamask-warning" id="issueMetamaskWarning">
+        <div class="metamask-warning-icon">🦊</div>
+        <div class="metamask-warning-text">
+          <h4>MetaMask Required</h4>
+          <p>Please <a href="https://metamask.io/download/" target="_blank" rel="noopener">install MetaMask</a> and connect your wallet to issue certificates.</p>
+        </div>
+      </div>
+
+      <!-- Admin Check Warning -->
+      <div class="alert alert-warning" id="notAdminAlert">
+        <span class="alert-icon">⚠️</span>
+        <div>
+          <strong>Not Authorized</strong><br/>
+          Your connected wallet is not the contract owner/admin. Only the admin address can issue certificates.
+          Please switch to the admin account in MetaMask.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <div class="card-icon">📜</div>
+          Certificate Information
+        </div>
+
+        <form id="issueCertForm" novalidate>
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="certId">Certificate ID *</label>
+              <input type="text" id="certId" name="certId"
+                     placeholder="e.g. CERT-2026-001"
+                     aria-required="true" required />
+            </div>
+
+            <div class="form-group">
+              <label for="issueDate">Issue Date *</label>
+              <input type="text" id="issueDate" name="issueDate"
+                     placeholder="e.g. 04 September 2026"
+                     aria-required="true" required />
+            </div>
+
+            <div class="form-group">
+              <label for="studentName">Student Name *</label>
+              <input type="text" id="studentName" name="studentName"
+                     placeholder="e.g. Rahul Patil"
+                     aria-required="true" required />
+            </div>
+
+            <div class="form-group">
+              <label for="studentEmail">Student Email *</label>
+              <input type="email" id="studentEmail" name="studentEmail"
+                     placeholder="e.g. rahul@example.com"
+                     aria-required="true" required />
+            </div>
+
+            <div class="form-group">
+              <label for="courseName">Course Name *</label>
+              <input type="text" id="courseName" name="courseName"
+                     placeholder="e.g. B.Tech Computer Engineering"
+                     aria-required="true" required />
+            </div>
+
+            <div class="form-group">
+              <label for="instituteName">Institute Name *</label>
+              <input type="text" id="instituteName" name="instituteName"
+                     placeholder="e.g. Rajaram Institute of Technology"
+                     aria-required="true" required />
+            </div>
+
+            <!-- Certificate File Upload (Full width) -->
+            <div class="form-group full-width">
+              <label>Certificate File (for SHA-256 hash)</label>
+              <div class="file-upload-area" id="issueFileArea">
+                <input type="file" id="issueCertFile"
+                       accept=".pdf,.png,.jpg,.jpeg"
+                       aria-label="Upload certificate file to generate hash" />
+                <span class="file-upload-icon">📄</span>
+                <div class="file-upload-text">
+                  <span>Click to upload</span> or drag & drop<br/>
+                  PDF, PNG, JPG supported
+                </div>
+              </div>
+              <div class="hash-display" id="issueHashDisplay">
+                <div class="hash-label">Generated SHA-256 Certificate Hash:</div>
+                <span id="issueCertHashValue"></span>
+              </div>
+            </div>
+
+            <!-- Manual hash input (hidden, used when file is selected) -->
+            <div class="form-group full-width">
+              <label for="certHash">Certificate Hash *</label>
+              <input type="text" id="certHash" name="certHash"
+                     placeholder="Upload file above to auto-generate, or enter manually"
+                     aria-required="true" required />
+            </div>
+
+          </div><!-- /form-grid -->
+
+          <!-- Form actions -->
+          <div style="display:flex; gap:12px; margin-top:24px; flex-wrap:wrap;">
+            <button type="submit" class="btn btn-primary btn-lg" id="btnIssueCert">
+              ⛓️ Issue Certificate on Blockchain
+            </button>
+            <button type="button" class="btn btn-ghost" id="btnClearForm" onclick="clearIssueForm()">
+              🗑️ Clear Form
+            </button>
+          </div>
+        </form>
+
+        <!-- Loading -->
+        <div class="loading-overlay" id="issueLoading">
+          <div class="spinner"></div>
+          <span id="issueLoadingText">Submitting transaction to blockchain...</span>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alert alert-error" id="issueError">
+          <span class="alert-icon">✗</span>
+          <span id="issueErrorText">An error occurred.</span>
+        </div>
+
+        <!-- Transaction Success Info -->
+        <div class="tx-info" id="issueTxInfo">
+          <div class="tx-info-title">✅ Certificate Issued Successfully!</div>
+          <div class="tx-row">
+            <span class="tx-key">Certificate ID:</span>
+            <span class="tx-val highlight" id="txCertId">—</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-key">Transaction Hash:</span>
+            <span class="tx-val" id="txHash">—</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-key">Issuer Address:</span>
+            <span class="tx-val" id="txIssuer">—</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-key">Certificate Hash:</span>
+            <span class="tx-val" id="txCertHash">—</span>
+          </div>
+          <div class="tx-row">
+            <span class="tx-key">Block Number:</span>
+            <span class="tx-val" id="txBlock">—</span>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-secondary" onclick="showSection('verify')">
+              🔍 Verify This Certificate
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /card -->
+
+      <!-- Demo data hint -->
+      <div class="alert alert-info" style="display:flex; margin-top: 20px;">
+        <span class="alert-icon">💡</span>
+        <div>
+          <strong>Demo Data:</strong> Certificate ID: <code>CERT-2026-001</code> |
+          Student: <code>Rahul Patil</code> | Course: <code>B.Tech Computer Engineering</code> |
+          Institute: <code>Rajaram Institute of Technology</code> | Date: <code>04 September 2026</code>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PAGE: VERIFY CERTIFICATE                              -->
+  <!-- ===================================================== -->
+  <section id="sectionVerify" class="page-section" aria-label="Verify Certificate">
+    <div class="section-container">
+
+      <div class="section-header">
+        <h2>Verify Certificate</h2>
+        <p>Enter a Certificate ID to verify its authenticity directly from blockchain</p>
+      </div>
+
+      <!-- Search Card -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-title">
+          <div class="card-icon">🔍</div>
+          Certificate Lookup
+        </div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <input type="text" id="verifyCertId"
+                 placeholder="Enter Certificate ID (e.g. CERT-2026-001)"
+                 style="flex:1; min-width:220px; background:var(--bg-input); border:1px solid var(--border);
+                        border-radius:8px; padding:12px 16px; color:var(--text-primary);
+                        font-size:0.92rem; outline:none;"
+                 aria-label="Certificate ID to verify"
+                 onkeydown="if(event.key==='Enter') verifyById()" />
+          <button class="btn btn-primary btn-lg" id="btnVerify" onclick="verifyById()">
+            🔍 Verify Certificate
+          </button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-overlay" id="verifyLoading">
+          <div class="spinner"></div>
+          Querying blockchain...
+        </div>
+
+        <!-- Error -->
+        <div class="alert alert-error" id="verifyError">
+          <span class="alert-icon">✗</span>
+          <span id="verifyErrorText">An error occurred.</span>
+        </div>
+      </div>
+
+      <!-- Verification Result -->
+      <div class="verify-result" id="verifyResult">
+
+        <!-- Status Banner -->
+        <div class="verify-status-banner" id="verifyStatusBanner">
+          <span id="verifyStatusIcon"></span>
+          <span id="verifyStatusText"></span>
+        </div>
+
+        <!-- Certificate Details -->
+        <div class="verify-details" id="verifyDetails">
+          <h3 style="margin-bottom:20px; font-size:1rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">
+            Certificate Details
+          </h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Certificate ID</div>
+              <div class="detail-value" id="dCertId">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Status</div>
+              <div id="dStatus">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Student Name</div>
+              <div class="detail-value" id="dStudentName">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Student Email</div>
+              <div class="detail-value" id="dEmail">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Course</div>
+              <div class="detail-value" id="dCourse">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Institute</div>
+              <div class="detail-value" id="dInstitute">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Issue Date</div>
+              <div class="detail-value" id="dIssueDate">—</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Issuer Wallet</div>
+              <div class="detail-value mono" id="dIssuer">—</div>
+            </div>
+            <div class="detail-item full">
+              <div class="detail-label">Certificate Hash (Blockchain)</div>
+              <div class="detail-value mono" id="dCertHash">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Verification (optional) -->
+        <div class="card" id="fileVerifySection">
+          <div class="card-title">
+            <div class="card-icon">📁</div>
+            Verify Certificate File Integrity
+          </div>
+          <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:16px;">
+            Upload the certificate file to check if it matches the blockchain record.
+          </p>
+
+          <div class="file-upload-area" id="verifyFileArea">
+            <input type="file" id="verifyCertFile"
+                   accept=".pdf,.png,.jpg,.jpeg"
+                   aria-label="Upload certificate file to verify hash"
+                   onchange="verifyFileHash()" />
+            <span class="file-upload-icon">🔍</span>
+            <div class="file-upload-text">
+              <span>Click to upload</span> certificate file<br/>
+              PDF, PNG, JPG supported
+            </div>
+          </div>
+
+          <!-- Hash comparison result -->
+          <div class="hash-compare-result" id="hashCompareResult">
+            <div class="hash-check-item">
+              <span class="check-icon" id="checkBlockchain"></span>
+              <span id="checkBlockchainText">Checking blockchain record...</span>
+            </div>
+            <div class="hash-check-item">
+              <span class="check-icon" id="checkHash"></span>
+              <span id="checkHashText">Comparing certificate hash...</span>
+            </div>
+            <div class="hash-check-item" style="margin-top:8px; font-weight:700; font-size:0.9rem;">
+              <span class="check-icon" id="checkFinal"></span>
+              <span id="checkFinalText"></span>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div class="hash-label">Uploaded File Hash:</div>
+            <div class="hash-display" id="verifyHashDisplay">
+              <span id="verifyFileHashValue"></span>
+            </div>
+          </div>
+
+        </div><!-- /card -->
+
+      </div><!-- /verify-result -->
+
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PAGE: ADMIN DASHBOARD                                 -->
+  <!-- ===================================================== -->
+  <section id="sectionAdmin" class="page-section" aria-label="Admin Dashboard">
+    <div class="section-container">
+
+      <div class="section-header">
+        <h2>Admin Dashboard</h2>
+        <p>Manage issued certificates — only accessible to the contract admin</p>
+      </div>
+
+      <!-- Not Admin Warning -->
+      <div class="alert alert-warning" id="adminNotAdminAlert">
+        <span class="alert-icon">⚠️</span>
+        <div>
+          <strong>Admin Access Required</strong><br/>
+          Connect the admin wallet to access this dashboard.
+          Only the contract owner/admin can view and manage certificates here.
+        </div>
+      </div>
+
+      <!-- Admin Content (shown only when admin connected) -->
+      <div class="admin-only" id="adminContent">
+
+        <!-- Admin Stats -->
+        <div class="admin-stats">
+          <div class="admin-stat-card">
+            <div class="admin-stat-number" id="adminStatWallet">—</div>
+            <div class="admin-stat-label">Connected Wallet</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-number" id="adminStatStatus">Admin ✓</div>
+            <div class="admin-stat-label">Admin Status</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-number" id="adminStatIssued">0</div>
+            <div class="admin-stat-label">Total Issued</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-number" id="adminStatRevoked">0</div>
+            <div class="admin-stat-label">Total Revoked</div>
+          </div>
+        </div>
+
+        <!-- Certificates Table -->
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="card-icon">📋</div>
+              Issued Certificates
+            </div>
+            <button class="btn btn-ghost" onclick="loadAdminDashboard()" style="padding:8px 16px; font-size:0.82rem;">
+              🔄 Refresh
+            </button>
+          </div>
+
+          <!-- Loading -->
+          <div class="loading-overlay" id="adminLoading">
+            <div class="spinner"></div>
+            Loading certificates from blockchain...
+          </div>
+
+          <div class="table-container">
+            <table id="certTable" aria-label="Issued certificates table">
+              <thead>
+                <tr>
+                  <th>Certificate ID</th>
+                  <th>Student</th>
+                  <th>Course</th>
+                  <th>Issue Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="certTableBody">
+                <tr>
+                  <td colspan="6" class="table-empty">
+                    No certificates found. Issue a certificate to get started.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div><!-- /card -->
+
+        <!-- Revoke Section -->
+        <div class="card" style="margin-top:24px;">
+          <div class="card-title">
+            <div class="card-icon">🚫</div>
+            Revoke Certificate
+          </div>
+          <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:16px;">
+            Enter a Certificate ID to revoke it. This action cannot be undone.
+          </p>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <input type="text" id="revokeCertId"
+                   placeholder="Enter Certificate ID to revoke"
+                   style="flex:1; min-width:200px; background:var(--bg-input); border:1px solid var(--border);
+                          border-radius:8px; padding:12px 16px; color:var(--text-primary);
+                          font-size:0.92rem; outline:none;"
+                   aria-label="Certificate ID to revoke" />
+            <button class="btn btn-danger" id="btnRevoke" onclick="revokeCertificate()"
+                    style="padding:12px 24px; font-size:0.9rem;">
+              🚫 Revoke Certificate
+            </button>
+          </div>
+
+          <!-- Loading -->
+          <div class="loading-overlay" id="revokeLoading">
+            <div class="spinner"></div>
+            Sending revocation transaction...
+          </div>
+
+          <div class="alert alert-success" id="revokeSuccess">
+            <span class="alert-icon">✅</span>
+            <span id="revokeSuccessText">Certificate revoked successfully.</span>
+          </div>
+          <div class="alert alert-error" id="revokeError">
+            <span class="alert-icon">✗</span>
+            <span id="revokeErrorText">Revocation failed.</span>
+          </div>
+        </div>
+
+      </div><!-- /admin-only -->
+
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PAGE: ABOUT                                           -->
+  <!-- ===================================================== -->
+  <section id="sectionAbout" class="page-section" aria-label="About">
+    <div class="section-container">
+
+      <div class="section-header">
+        <h2>About This Project</h2>
+        <p>Blockchain-Based Certificate Verification System — Final Year Engineering Project</p>
+      </div>
+
+      <div class="about-grid">
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-icon">🎯</div>
+            Project Objective
+          </div>
+          <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.8;">
+            This DApp demonstrates how blockchain technology can solve the problem of
+            fake academic certificates. Instead of relying on a central database, certificate
+            records are stored on the Ethereum blockchain, making them immutable and
+            publicly verifiable by anyone, anywhere.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-icon">🛠️</div>
+            Technology Stack
+          </div>
+          <div>
+            <div class="tech-badge">⚙️ Solidity 0.8.19</div>
+            <div class="tech-badge">🔨 Hardhat</div>
+            <div class="tech-badge">🌐 ethers.js v6</div>
+            <div class="tech-badge">🦊 MetaMask</div>
+            <div class="tech-badge">📄 HTML5 / CSS3</div>
+            <div class="tech-badge">⚡ Vanilla JavaScript</div>
+            <div class="tech-badge">🔐 SHA-256 (Web Crypto API)</div>
+            <div class="tech-badge">⛓️ Ethereum (Local Hardhat)</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-icon">🔐</div>
+            Security Features
+          </div>
+          <ul style="color:var(--text-secondary); font-size:0.88rem; padding-left:20px; line-height:2;">
+            <li>Only contract owner can issue/revoke certificates</li>
+            <li>Duplicate Certificate IDs are rejected</li>
+            <li>SHA-256 hash detects file tampering</li>
+            <li>All transactions require MetaMask signature</li>
+            <li>No private keys stored in frontend code</li>
+            <li>Revoked certificates are permanently flagged</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-icon">📊</div>
+            System Architecture
+          </div>
+          <div style="font-size:0.82rem; font-family:var(--font-mono); color:var(--text-secondary); line-height:2.2;">
+            User (Browser)<br/>
+            &nbsp;&nbsp;↓<br/>
+            Frontend DApp (HTML/JS)<br/>
+            &nbsp;&nbsp;↓<br/>
+            MetaMask (Wallet)<br/>
+            &nbsp;&nbsp;↓<br/>
+            ethers.js (Library)<br/>
+            &nbsp;&nbsp;↓<br/>
+            Smart Contract (Solidity)<br/>
+            &nbsp;&nbsp;↓<br/>
+            Ethereum Blockchain
+          </div>
+        </div>
+
+      </div><!-- /about-grid -->
+
+      <!-- Contract Info -->
+      <div class="card" style="margin-top:20px;">
+        <div class="card-title">
+          <div class="card-icon">📄</div>
+          Deployed Contract Information
+        </div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Contract Address</div>
+            <div class="detail-value mono" id="aboutContractAddr">Not deployed yet</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Network</div>
+            <div class="detail-value" id="aboutNetwork">Hardhat Local (Chain ID: 31337)</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Owner / Admin</div>
+            <div class="detail-value mono" id="aboutOwner">—</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">RPC URL</div>
+            <div class="detail-value mono">http://127.0.0.1:8545</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- FOOTER                                                -->
+  <!-- ===================================================== -->
+  <footer>
+    <p>
+      🔗 <strong>Blockchain Certificate Verification System</strong><br/>
+      Final Year Project — Computer Engineering<br/>
+      Built with Solidity · Hardhat · ethers.js · MetaMask
+    </p>
+    <p style="margin-top:12px; font-size:0.75rem;">
+      Running on <strong>Hardhat Local Network</strong> (Chain ID: 31337) · RPC: http://127.0.0.1:8545
+    </p>
+  </footer>
+
+  <!-- ===================================================== -->
+  <!-- SCRIPTS                                               -->
+  <!-- ===================================================== -->
+
+  <!-- ethers.js v6 from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+
+  <!-- Contract ABI + Address (auto-generated by deploy script) -->
+  <script src="contract-config.js"></script>
+
+  <!-- Main App Logic -->
+  <script src="app.js"></script>
+
+</body>
+</html>
